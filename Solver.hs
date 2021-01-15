@@ -16,4 +16,6 @@ main = do
     puzzle <- readPuzzle "puzzle"
     print puzzle
     let test = parseToBoard puzzle
-    printBoard test
+    let indexies = getIndexies test
+    checkIfAllFieldGetStateNotNull test indexies
+    -- printBoardIndexies test

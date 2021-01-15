@@ -18,15 +18,10 @@ getState(Field s _ _) = s
 getValue :: Field -> FieldValue
 getValue(Field _ v _) = v 
 
-isNotNothingValue :: FieldValue -> Bool
-isNotNothingValue value
+hasValue :: FieldValue -> Bool
+hasValue value
     | value == Nothing = False
     | otherwise = True
-
-isNothingValue :: FieldValue -> Bool
-isNothingValue value
-    | value == Nothing = True
-    | otherwise = False
 
 getNotNullValue :: Field -> Int
 getNotNullValue field = fromMaybe 11 (getValue field) -- 11 nie poprawna wartość pola
@@ -44,3 +39,8 @@ getFieldPrint field
     | ((getState field) == Empty) = '.'
     | ((getState field) == Null) = '?'
     | otherwise = '!'
+
+checkCompleted :: Field -> Bool
+checkCompleted field
+    | ((getState field) == Null) = False
+    | otherwise = True
