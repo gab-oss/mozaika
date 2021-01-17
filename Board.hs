@@ -2,6 +2,7 @@ module Board where
 
 import Data.List
 import Data.Array
+import Data.Maybe
 import Field
 import Control.Monad (forM_)
 
@@ -59,3 +60,44 @@ cutCellGroup mosaic (y,x) = map (take (x2 - x1 + 1)) (map (drop x1) (take (y2 - 
 
 countStateForClue :: Board -> (Int, Int) -> State -> Int -- zwraca liczbe pol o danym stanie wokol pola o zadanych wspolrzednych
 countStateForClue mosaic (y,x) state = sum (map length (map (filter (\field -> (getState field) == state)) (cutCellGroup mosaic (y,x))))
+
+
+collectCluesAroundCell :: Board -> (Int, Int) -> [((Int,Int), Field)] -- zbierz podpowiedzi dotykajace pola w jedna liste - jako element listy krotka: wspolrzedne pola z podpowiedzia + samo pole
+collectCluesAroundCell mosaic (y,x) = collectClues (cutCellGroup mosaic (y,x)) (y - 1, x - 1)
+                            where collectClues [] (_,_) = []
+                                  collectClues mosaic (-1, x) = collectClues mosaic (0, x)
+                                  collectClues mosaic (y, -1) = collectClues mosaic (y, 0)
+                                  collectClues (row : mosaic) (i,j) = collectCluesFromRow row (i,j) ++ collectClues mosaic (i + 1, j)
+                                      where collectCluesFromRow [] (_,_) = []
+                                            collectCluesFromRow (cell : row) (k,l) = [((k,l), cell)] ++ collectCluesFromRow row (k, l + 1)
+
+checkIfEqual :: Board -> (Int, Int) -> Field -> Bool -- sprawdz czy suma zamalowanych pol wokol pola z podpowiedzia jest rowna podpowiedzi
+checkIfEqual mosaic (y,x) field = (countStateForClue mosaic (y,x) Filled) == (fromMaybe 0 (getValue field))
+
+checkIfNotMore :: Board -> (Int, Int) -> Field -> Bool -- sprawdz czy suma zamalowanych pol wokol pola z podpowiedzia jest nie wieksza niz podpowiedz
+checkIfNotMore mosaic (y,x) field = (countStateForClue mosaic (y,x) Filled) <= (fromMaybe 0 (getValue field))
+
+checkValidityAroundPosition :: Board -> (Int,Int) -> Bool -- sprawdz czy dla podpowiedzi wokol pola wypelnienie pol jest prawidlowe
+checkValidityAroundPosition mosaic (y,x) = checkCluesValidity mosaic (collectCluesAroundCell mosaic (y,x)) (y,x)
+                            where checkCluesValidity mosaic [] (_,_) = True
+                                  checkCluesValidity mosaic (((i,j), field) : clues) (y,x) | (i == y - 1 && j == x - 1) =  if equal 
+                                                                                                                           then equal && checkCluesValidity mosaic clues (y,x)
+                                                                                                                           else False
+                                                                                           | (i == y - 1 && x == lastColNum) =  if equal 
+                                                                                                                                then equal && checkCluesValidity mosaic clues (y,x)
+                                                                                                                                else False
+                                                                                           | (j == x - 1 && y == lastRowNum) =  if equal 
+                                                                                                                                then equal && checkCluesValidity mosaic clues (y,x)
+                                                                                                                                else False
+                                                                                           | (i == lastRowNum && j == lastColNum) =  if equal 
+                                                                                                                                     then equal && checkCluesValidity mosaic clues (y,x)
+                                                                                                                                     else False
+                                                                                           | otherwise = if notMore 
+                                                                                                         then notMore && checkCluesValidity mosaic clues (y,x)
+                                                                                                         else False
+                                                                                            where equal = checkIfEqual mosaic (i,j) field 
+                                                                                                  notMore = checkIfNotMore mosaic (i,j) field
+                                                                                                  lastColNum = length (head mosaic) - 1
+                                                                                                  lastRowNum = length mosaic - 1
+
+
