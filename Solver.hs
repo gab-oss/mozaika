@@ -16,8 +16,10 @@ main = do
     puzzle <- readPuzzle "puzzle"
     print puzzle
     --let test = countStateForClue (changeState (parseToBoard puzzle) (1,3) Filled) (1,3) Filled
-    let test = collectCluesAroundCell (parseToBoard puzzle) (0,2)
+    --let test = collectCluesAroundCell (parseToBoard puzzle) (0,2)
     --let indexies = getIndexies test
     --checkIfAllFieldGetStateNotNull test indexies
     -- printBoardIndexies test
+    let test = checkValidityAroundPosition (changeState (parseToBoard puzzle) (7,9) Filled) (8,9)
     print test
+    printBoard (changeState (parseToBoard puzzle) (4,3) Filled)

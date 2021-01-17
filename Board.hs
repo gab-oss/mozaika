@@ -69,34 +69,31 @@ collectCluesAroundCell mosaic (y,x) = collectClues (cutCellGroup mosaic (y,x)) (
                                   collectClues mosaic (y, -1) = collectClues mosaic (y, 0)
                                   collectClues (row : mosaic) (i,j) = collectCluesFromRow row (i,j) ++ collectClues mosaic (i + 1, j) -- iteracja po wierszach fragmentu
                                       where collectCluesFromRow [] (_,_) = []
-                                            collectCluesFromRow (cell : row) (k,l) = [((k,l), cell)] ++ collectCluesFromRow row (k, l + 1) -- iteracja po polach w wierszu
+                                            collectCluesFromRow (cell : row) (k,l) = if (isNothing (getValue cell)) -- iteracja po polach w wierszu
+                                                                                     then [] ++ collectCluesFromRow row (k, l + 1) 
+                                                                                     else [((k,l), cell)] ++ collectCluesFromRow row (k, l + 1) 
+                                                
 
-checkIfEqual :: Board -> (Int, Int) -> Field -> Bool -- sprawdz czy suma zamalowanych pol wokol pola z podpowiedzia jest rowna podpowiedzi
-checkIfEqual mosaic (y,x) field = (countStateForClue mosaic (y,x) Filled) == (fromMaybe 0 (getValue field))
+checkIfEqual :: Board -> (Int, Int) -> Bool -- sprawdz czy suma zamalowanych pol wokol pola z podpowiedzia jest rowna podpowiedzi
+checkIfEqual mosaic (y,x) = (countStateForClue mosaic (y,x) Filled) == (fromMaybe 0 (getValue (getField mosaic y x)))
 
-checkIfNotMore :: Board -> (Int, Int) -> Field -> Bool -- sprawdz czy suma zamalowanych pol wokol pola z podpowiedzia jest nie wieksza niz podpowiedz
-checkIfNotMore mosaic (y,x) field = (countStateForClue mosaic (y,x) Filled) <= (fromMaybe 0 (getValue field))
+checkIfNotMore :: Board -> (Int, Int) -> Bool -- sprawdz czy suma zamalowanych pol wokol pola z podpowiedzia jest nie wieksza niz podpowiedz
+checkIfNotMore mosaic (y,x) = (countStateForClue mosaic (y,x) Filled) <= (fromMaybe 0 (getValue (getField mosaic y x)))
 
 checkValidityAroundPosition :: Board -> (Int,Int) -> Bool -- sprawdz czy dla podpowiedzi wokol pola wypelnienie pol jest prawidlowe
 checkValidityAroundPosition mosaic (y,x) = checkCluesValidity mosaic (collectCluesAroundCell mosaic (y,x)) (y,x)
                             where checkCluesValidity mosaic [] (_,_) = True
-                                  checkCluesValidity mosaic (((i,j), field) : clues) (y,x) | (i == y - 1 && j == x - 1) =  if equal -- podpowiedz u gory z lewej przerabianego pola
-                                                                                                                           then equal && checkCluesValidity mosaic clues (y,x)
-                                                                                                                           else False
-                                                                                           | (i == y - 1 && x == lastColNum) =  if equal -- przerabiamy pole przy prawej krawedzi, podpowiedz nad polem
-                                                                                                                                then equal && checkCluesValidity mosaic clues (y,x)
-                                                                                                                                else False
-                                                                                           | (j == x - 1 && y == lastRowNum) =  if equal -- przerabiamy pole przy dolnej krawedzi, podpowiedz na lewo od pola
-                                                                                                                                then equal && checkCluesValidity mosaic clues (y,x)
-                                                                                                                                else False
-                                                                                           | (i == lastRowNum && j == lastColNum) =  if equal -- przerabiamy ostatnie pole (w prawym dolnym rogu)
-                                                                                                                                     then True
-                                                                                                                                     else False
+                                  checkCluesValidity mosaic (((i,j), field) : clues) (y,x) | (i == y - 1 && j == x - 1) -- podpowiedz u gory z lewej przerabianego pola
+                                                                                                || (i == y - 1 && x == lastColNum) -- przerabiamy pole przy prawej krawedzi, podpowiedz nad polem
+                                                                                                    || (j == x - 1 && y == lastRowNum)-- przerabiamy pole przy dolnej krawedzi, podpowiedz na lewo od pola
+                                                                                                        || (i == lastRowNum && j == lastColNum) =  if equal -- przerabiamy ostatnie pole (w prawym dolnym rogu)
+                                                                                                                                                   then equal && checkCluesValidity mosaic clues (y,x)
+                                                                                                                                                   else False
                                                                                            | otherwise = if notMore 
                                                                                                          then notMore && checkCluesValidity mosaic clues (y,x)
                                                                                                          else False
-                                                                                            where equal = checkIfEqual mosaic (i,j) field 
-                                                                                                  notMore = checkIfNotMore mosaic (i,j) field
+                                                                                            where equal = checkIfEqual mosaic (i,j)
+                                                                                                  notMore = checkIfNotMore mosaic (i,j)
                                                                                                   lastColNum = length (head mosaic) - 1
                                                                                                   lastRowNum = length mosaic - 1
 
