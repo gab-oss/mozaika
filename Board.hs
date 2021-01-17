@@ -63,13 +63,13 @@ countStateForClue mosaic (y,x) state = sum (map length (map (filter (\field -> (
 
 
 collectCluesAroundCell :: Board -> (Int, Int) -> [((Int,Int), Field)] -- zbierz podpowiedzi dotykajace pola w jedna liste - jako element listy krotka: wspolrzedne pola z podpowiedzia + samo pole
-collectCluesAroundCell mosaic (y,x) = collectClues (cutCellGroup mosaic (y,x)) (y - 1, x - 1)
+collectCluesAroundCell mosaic (y,x) = collectClues (cutCellGroup mosaic (y,x)) (y - 1, x - 1) -- wytnij fragment planszy wokol pola i zbierz liste podpowiedzi zaczynajac od lewego gornego rogu fragmentu
                             where collectClues [] (_,_) = []
-                                  collectClues mosaic (-1, x) = collectClues mosaic (0, x)
+                                  collectClues mosaic (-1, x) = collectClues mosaic (0, x) -- jesli wyrzucilo nas poza plansze, wracamy do (0,0)
                                   collectClues mosaic (y, -1) = collectClues mosaic (y, 0)
-                                  collectClues (row : mosaic) (i,j) = collectCluesFromRow row (i,j) ++ collectClues mosaic (i + 1, j)
+                                  collectClues (row : mosaic) (i,j) = collectCluesFromRow row (i,j) ++ collectClues mosaic (i + 1, j) -- iteracja po wierszach fragmentu
                                       where collectCluesFromRow [] (_,_) = []
-                                            collectCluesFromRow (cell : row) (k,l) = [((k,l), cell)] ++ collectCluesFromRow row (k, l + 1)
+                                            collectCluesFromRow (cell : row) (k,l) = [((k,l), cell)] ++ collectCluesFromRow row (k, l + 1) -- iteracja po polach w wierszu
 
 checkIfEqual :: Board -> (Int, Int) -> Field -> Bool -- sprawdz czy suma zamalowanych pol wokol pola z podpowiedzia jest rowna podpowiedzi
 checkIfEqual mosaic (y,x) field = (countStateForClue mosaic (y,x) Filled) == (fromMaybe 0 (getValue field))
