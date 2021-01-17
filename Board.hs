@@ -80,17 +80,17 @@ checkIfNotMore mosaic (y,x) field = (countStateForClue mosaic (y,x) Filled) <= (
 checkValidityAroundPosition :: Board -> (Int,Int) -> Bool -- sprawdz czy dla podpowiedzi wokol pola wypelnienie pol jest prawidlowe
 checkValidityAroundPosition mosaic (y,x) = checkCluesValidity mosaic (collectCluesAroundCell mosaic (y,x)) (y,x)
                             where checkCluesValidity mosaic [] (_,_) = True
-                                  checkCluesValidity mosaic (((i,j), field) : clues) (y,x) | (i == y - 1 && j == x - 1) =  if equal 
+                                  checkCluesValidity mosaic (((i,j), field) : clues) (y,x) | (i == y - 1 && j == x - 1) =  if equal -- podpowiedz u gory z lewej przerabianego pola
                                                                                                                            then equal && checkCluesValidity mosaic clues (y,x)
                                                                                                                            else False
-                                                                                           | (i == y - 1 && x == lastColNum) =  if equal 
+                                                                                           | (i == y - 1 && x == lastColNum) =  if equal -- przerabiamy pole przy prawej krawedzi, podpowiedz nad polem
                                                                                                                                 then equal && checkCluesValidity mosaic clues (y,x)
                                                                                                                                 else False
-                                                                                           | (j == x - 1 && y == lastRowNum) =  if equal 
+                                                                                           | (j == x - 1 && y == lastRowNum) =  if equal -- przerabiamy pole przy dolnej krawedzi, podpowiedz na lewo od pola
                                                                                                                                 then equal && checkCluesValidity mosaic clues (y,x)
                                                                                                                                 else False
-                                                                                           | (i == lastRowNum && j == lastColNum) =  if equal 
-                                                                                                                                     then equal && checkCluesValidity mosaic clues (y,x)
+                                                                                           | (i == lastRowNum && j == lastColNum) =  if equal -- przerabiamy ostatnie pole (w prawym dolnym rogu)
+                                                                                                                                     then True
                                                                                                                                      else False
                                                                                            | otherwise = if notMore 
                                                                                                          then notMore && checkCluesValidity mosaic clues (y,x)
