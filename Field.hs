@@ -23,8 +23,6 @@ hasValue value
     | value == Nothing = False
     | otherwise = True
 
-getNotNullValue :: Field -> Int
-getNotNullValue field = fromMaybe 11 (getValue field) -- 11 nie poprawna wartość pola
 
 getFieldProcessedStatus :: Field -> Bool
 getFieldProcessedStatus(Field _ _ b) = b 

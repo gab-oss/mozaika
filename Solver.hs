@@ -13,9 +13,8 @@ readPuzzle filename = do
     return puzzle
 
 main = do
-    puzzle <- readPuzzle "puzzle"
+    puzzle <- readPuzzle "tests/puzzle"
     print puzzle
-    --let test = countStateForClue (changeState (parseToBoard puzzle) (1,3) Filled) (1,3) Filled
     let board = parseToBoard puzzle
     let indexies = getIndexies board
     solve board indexies

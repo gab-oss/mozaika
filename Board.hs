@@ -4,7 +4,8 @@ import Data.List
 import Data.Array
 import Data.Maybe
 import Field
-import Control.Monad (forM_)
+import System.Exit (exitSuccess)
+
 
 type Board = [[Field]]
 
@@ -18,15 +19,15 @@ countColumns :: Board -> Int
 countColumns board = length (head board)
 
 getField :: Board -> Int -> Int -> Field
-getField table x y = table !! x !! y
+getField table y x = table !! y !! x
 
 parseToBoard :: [String] -> Board
-parseToBoard = map (map toDefaultField) --https://stackoverflow.com/questions/8735072/double-map-in-haskell
+parseToBoard = map (map toDefaultField)
 
 printBoard :: Board -> IO()
 printBoard = mapM_ (print . map getFieldPrint)
 
-printBoardIndexies :: Board -> IO() -- funkcja ktra wypisuje do konsoli indexy wszystkich elementów (dla testów)
+printBoardIndexies :: Board -> IO() -- funkcja ktora wypisuje do konsoli indexy wszystkich elementów (dla testów)
 printBoardIndexies board = mapM_ (putStrLn . showTup) (getIndexies board)
 
 showTup :: (Show a, Show b) => (a,b) -> String
@@ -96,11 +97,15 @@ checkValidityAroundPosition mosaic (y,x) = checkCluesValidity mosaic (collectClu
                                                                                                   lastColNum = length (head mosaic) - 1
                                                                                                   lastRowNum = length mosaic - 1
 
-solve :: Board -> [(Int, Int)] -> IO()
+solve :: Board -> [(Int, Int)] -> IO() -- funkcja mająca na celu sprawdzenia wszystkie możliwe kombinacje zamalowania iteracyjnie komurek tablicy, sprawdzając czy wpływ na sąsiedznie komurki
 solve _ [] = print "Empty"
 solve board ((y,x):xs) 
-    | ((countRows board) - 1 == x) && ((countColumns board) - 1 == y) && (checkValidityAroundPosition (changeState board (y,x) Empty) (y,x))  = printBoard (changeState board (y,x) Empty)
-    | ((countRows board) - 1 == x) && ((countColumns board) - 1 == y) && (checkValidityAroundPosition (changeState board (y,x) Filled) (y,x))  = printBoard (changeState board (y,x) Filled)
+    | ((countRows board) - 1 == x) && ((countColumns board) - 1 == y) && (checkValidityAroundPosition (changeState board (y,x) Empty) (y,x))  = do 
+            printBoard (changeState board (y,x) Empty)
+            exitSuccess
+    | ((countRows board) - 1 == x) && ((countColumns board) - 1 == y) && (checkValidityAroundPosition (changeState board (y,x) Filled) (y,x))  = do 
+            printBoard (changeState board (y,x) Filled)
+            exitSuccess
     | otherwise = if validEmpty && validFilled
                   then do
                         solve (changeState board (y,x) Empty) xs 
