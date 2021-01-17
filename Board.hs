@@ -97,7 +97,7 @@ checkValidityAroundPosition mosaic (y,x) = checkCluesValidity mosaic (collectClu
                                                                                                   lastColNum = length (head mosaic) - 1
                                                                                                   lastRowNum = length mosaic - 1
 
-solve :: Board -> [(Int, Int)] -> IO() -- funkcja mająca na celu sprawdzenia wszystkie możliwe kombinacje zamalowania iteracyjnie komurek tablicy, sprawdzając czy wpływ na sąsiedznie komurki
+solve :: Board -> [(Int, Int)] -> IO() -- funkcja mająca na celu sprawdzenie wszystkie możliwe kombinacjie iteracyjnego zamalowania/niezamalowania komurek tablicy, sprawdzając czy zamalowanie/niezamalowanie wpływa na poprawność rozwiązania
 solve _ [] = print "Empty"
 solve board ((y,x):xs) 
     | ((countRows board) - 1 == x) && ((countColumns board) - 1 == y) && (checkValidityAroundPosition (changeState board (y,x) Empty) (y,x))  = do 
