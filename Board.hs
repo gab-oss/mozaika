@@ -9,7 +9,7 @@ import Control.Monad (forM_)
 type Board = [[Field]]
 
 getIndexies :: Board -> [(Int, Int)]
-getIndexies board = [(row,column) | row <- [0..(countRows board)-1], column <- [0..(countColumns board)-1]]
+getIndexies board = [(column, row) | column <- [0..(countColumns board)-1], row <- [0..(countRows board)-1]]
 
 countRows :: Board -> Int
 countRows board = length board
@@ -29,17 +29,16 @@ printBoard = mapM_ (print . map getFieldPrint)
 printBoardIndexies :: Board -> IO() -- funkcja ktra wypisuje do konsoli indexy wszystkich elementów (dla testów)
 printBoardIndexies board = mapM_ (putStrLn . showTup) (getIndexies board)
 
-checkIfAllFieldGetStateNotNull :: Board -> [(Int, Int)] -> IO() -- funkcja która wypisuje do konsoli elementy z boarda po kolei ( ta funkcja jest dla testu iteracji po macierzy)
-checkIfAllFieldGetStateNotNull _ [] = print ":("
-checkIfAllFieldGetStateNotNull board ((x,y):xs)
-    | ( getState (getField board x y)) == Null = checkIfAllFieldGetStateNotNull board xs  -- warunek w celach zapętlenia przejścia przez calą listę, ponieważ wsyztsko jest ustawione na NULL
-    | otherwise = print (getNotNullValue (getField board x y)) -- przejdzie przez calę listę jak ona się zrobi pusta to wypiszę smutną buźkę ;(
-
 showTup :: (Show a, Show b) => (a,b) -> String
 showTup (a,b) = (show a) ++ "," ++ (show b)
 
 showValue :: (Show a) => a -> String
 showValue (a) = show a
+
+getFieldNeighbour :: Board -> (Int,Int) -> (Int,Int)
+getFieldNeighbour board (y,x) | (y == (countColumns board) - 1) && (x == (countRows board) - 1) = (0,0)
+                              | x == (countRows board) -1 = (y+1,0)
+                              | otherwise = (y, x+1) 
 
 changeState :: Board -> (Int,Int) -> State -> Board -- wspolrzedne pola jako (wiersz, kolumna)
 changeState [] _ _ = []
@@ -97,4 +96,23 @@ checkValidityAroundPosition mosaic (y,x) = checkCluesValidity mosaic (collectClu
                                                                                                   lastColNum = length (head mosaic) - 1
                                                                                                   lastRowNum = length mosaic - 1
 
-
+solve :: Board -> [(Int, Int)] -> IO()
+solve _ [] = print "Empty"
+solve board ((y,x):xs) 
+    | ((countRows board) - 1 == x) && ((countColumns board) - 1 == y) && (checkValidityAroundPosition (changeState board (y,x) Empty) (y,x))  = printBoard (changeState board (y,x) Empty)
+    | ((countRows board) - 1 == x) && ((countColumns board) - 1 == y) && (checkValidityAroundPosition (changeState board (y,x) Filled) (y,x))  = printBoard (changeState board (y,x) Filled)
+    | otherwise = if validEmpty && validFilled
+                  then do
+                        solve (changeState board (y,x) Empty) xs 
+                        solve (changeState board (y,x) Filled) xs
+                  else 
+                        if validEmpty 
+                        then 
+                            solve (changeState board (y,x) Empty) xs
+                        else 
+                            if validFilled 
+                            then
+                                solve (changeState board (y,x) Filled) xs
+                            else return()
+    where validEmpty = checkValidityAroundPosition (changeState board (y,x) Empty) (y,x)
+          validFilled = checkValidityAroundPosition (changeState board (y,x) Filled) (y,x)
