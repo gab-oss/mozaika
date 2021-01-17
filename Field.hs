@@ -42,3 +42,4 @@ checkCompleted :: Field -> Bool
 checkCompleted field
     | ((getState field) == Null) = False
     | otherwise = True
+    

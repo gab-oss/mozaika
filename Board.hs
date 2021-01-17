@@ -100,10 +100,10 @@ checkValidityAroundPosition mosaic (y,x) = checkCluesValidity mosaic (collectClu
 solve :: Board -> [(Int, Int)] -> IO() -- funkcja mająca na celu sprawdzenie wszystkie możliwe kombinacjie iteracyjnego zamalowania/niezamalowania komurek tablicy, sprawdzając czy zamalowanie/niezamalowanie wpływa na poprawność rozwiązania
 solve _ [] = print "Empty"
 solve board ((y,x):xs) 
-    | ((countRows board) - 1 == x) && ((countColumns board) - 1 == y) && (checkValidityAroundPosition (changeState board (y,x) Empty) (y,x))  = do 
+    | ((countRows board) - 1 == x) && ((countColumns board) - 1 == y) && (validEmpty)  = do 
             printBoard (changeState board (y,x) Empty)
             exitSuccess
-    | ((countRows board) - 1 == x) && ((countColumns board) - 1 == y) && (checkValidityAroundPosition (changeState board (y,x) Filled) (y,x))  = do 
+    | ((countRows board) - 1 == x) && ((countColumns board) - 1 == y) && (validFilled)  = do 
             printBoard (changeState board (y,x) Filled)
             exitSuccess
     | otherwise = if validEmpty && validFilled
