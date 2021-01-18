@@ -33,21 +33,13 @@ printBoardIndexies board = mapM_ (putStrLn . showTup) (getIndexies board)
 showTup :: (Show a, Show b) => (a,b) -> String
 showTup (a,b) = (show a) ++ "," ++ (show b)
 
-showValue :: (Show a) => a -> String
-showValue (a) = show a
-
-getFieldNeighbour :: Board -> (Int,Int) -> (Int,Int)
-getFieldNeighbour board (y,x) | (y == (countColumns board) - 1) && (x == (countRows board) - 1) = (0,0)
-                              | x == (countRows board) -1 = (y+1,0)
-                              | otherwise = (y, x+1) 
-
 changeState :: Board -> (Int,Int) -> State -> Board -- wspolrzedne pola jako (wiersz, kolumna)
 changeState [] _ _ = []
 changeState (row : mosaic) (y,x) state | y > 0 = [row] ++ changeState mosaic (y - 1, x) state 
                                        | y == 0 = [checkCell row x state] ++ mosaic
 
-checkCell :: [Field] -> Int -> State -> [Field]
-checkCell [] _ _ = [] -- zamalowuje x-ta komorke w wierszu
+checkCell :: [Field] -> Int -> State -> [Field] -- zmienia status x-tej komorki w wierszu
+checkCell [] _ _ = [] 
 checkCell (cell : row) 0 state = [(Field state (getValue cell) True)] ++ row
 checkCell (cell : row) x state = [cell] ++ checkCell row (x - 1) state
 
