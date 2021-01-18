@@ -13,7 +13,7 @@ readPuzzle filename = do
     return puzzle
 
 main = do
-    puzzle <- readPuzzle "tests/tiger"
+    puzzle <- readPuzzle "tests/puzzle"
     print puzzle
     let board = parseToBoard puzzle
     let indexies = getIndexies board
